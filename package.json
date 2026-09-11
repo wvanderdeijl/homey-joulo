@@ -6,7 +6,8 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "validate": "homey app validate -l publish"
+    "validate": "homey app validate -l publish",
+    "verify:live": "tsx scripts/verify-live.ts"
   },
   "author": "Wilfred van der Deijl",
   "license": "MIT",
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
     "@types/node": "^22.13.10",
+    "tsx": "^4.23.13",
     "typescript": "^5.8.2",
     "vitest": "^3.0.8"
   }

@@ -20,7 +20,7 @@ We willen moderne TypeScript functionaliteiten en de meest strikte typechecking 
    - `target: "ES2022"` (ondersteund door Node.js 18+ en Node.js 22).
    - `module: "CommonJS"` of `moduleResolution: "Node"`.
 3. **Build Pipeline**:
-   - TypeScript code leeft in `src/` of `.homeycompose/` en compileert naar geldige Node.js code conform de Homey Apps SDK v3 structuur.
+   - TypeScript code leeft in de projectstructuur (`app.ts`, `lib/**/*.ts`, `drivers/**/*.ts`) en compileert naar geldige Node.js code in `.homeybuild/` conform de Homey Apps SDK v3 structuur.
    - `package.json` bevat `npm run build` (`tsc`) en `homey app validate` voor CI/CD en lokale checks.
 
 ## Gevolgen
