@@ -1,0 +1,19 @@
+{
+  "type": "number",
+  "title": {
+    "en": "ERE Credits",
+    "nl": "ERE-credits"
+  },
+  "desc": {
+    "en": "Cumulative emission reduction units (ERE)",
+    "nl": "Cumulatieve emissiereductie-eenheden (ERE)"
+  },
+  "units": "ERE",
+  "decimals": 2,
+  "chartType": "line",
+  "uiComponent": "sensor",
+  "insights": true,
+  "getable": true,
+  "setable": false
+}
+

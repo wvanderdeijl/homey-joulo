@@ -1,0 +1,36 @@
+[
+  {
+    "id": "token",
+    "type": "password",
+    "label": {
+      "en": "API Bearer Token",
+      "nl": "API Bearer Token"
+    },
+    "hint": {
+      "en": "Personal API Bearer token from joulo.nl/dashboard -> Settings -> API",
+      "nl": "Persoonlijke API Bearer token van joulo.nl/dashboard -> Instellingen -> API"
+    },
+    "value": ""
+  },
+  {
+    "id": "poll_interval",
+    "type": "number",
+    "label": {
+      "en": "Polling Interval",
+      "nl": "Synchronisatie-interval"
+    },
+    "hint": {
+      "en": "Interval in seconds between Joulo API synchronizations (minimum 60s)",
+      "nl": "Interval in seconden tussen synchronisaties met Joulo API (minimaal 60s)"
+    },
+    "value": 300,
+    "min": 60,
+    "max": 3600,
+    "step": 30,
+    "units": {
+      "en": "s",
+      "nl": "s"
+    }
+  }
+]
+

@@ -55,11 +55,20 @@ export interface JouloSession {
   status?: JouloSessionStatus | string | undefined;
   id_tag?: string | null | undefined;
   counts_for_ere?: boolean | undefined;
-  ere_credits?: number | undefined;
+  ere_credits?: number | null | undefined;
+  estimated_euro?: number | null | undefined;
+}
+
+export interface JouloEstimateBasis {
+  price_per_ere?: number | undefined;
+  effective_fee_pct?: number | undefined;
 }
 
 export interface JouloSessionsResponse {
   sessions?: JouloSession[] | undefined;
+  limit?: number | undefined;
+  offset?: number | undefined;
+  estimate_basis?: JouloEstimateBasis | undefined;
 }
 
 export interface JouloListSessionsOptions {

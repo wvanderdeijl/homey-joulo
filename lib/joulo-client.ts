@@ -8,6 +8,7 @@ import type {
   JouloRebootResponse,
   JouloRebootType,
   JouloErrorResponse,
+  JouloEstimateBasis,
 } from './types';
 
 export const DEFAULT_JOULO_API_BASE_URL = 'https://api.joulo.nl/functions/v1/api';
@@ -150,6 +151,16 @@ export class JouloClient {
    * Fetches charging sessions with optional pagination and filters.
    */
   public async getSessions(options?: JouloListSessionsOptions): Promise<JouloSession[]> {
+    const data = await this.getSessionsResponse(options);
+    return data?.sessions ?? [];
+  }
+
+  /**
+   * Fetches charging sessions full response including pagination metadata and estimate_basis.
+   */
+  public async getSessionsResponse(
+    options?: JouloListSessionsOptions,
+  ): Promise<JouloSessionsResponse> {
     const query = new URLSearchParams();
 
     if (options?.limit !== undefined) {
@@ -171,11 +182,9 @@ export class JouloClient {
     const queryString = query.toString();
     const path = queryString ? `/sessions?${queryString}` : '/sessions';
 
-    const data = await this.request<JouloSessionsResponse>(path, {
+    return this.request<JouloSessionsResponse>(path, {
       method: 'GET',
     });
-
-    return data?.sessions ?? [];
   }
 
   /**
@@ -315,3 +324,21 @@ export class JouloClient {
     );
   }
 }
+
+/**
+ * Calculates estimated earnings in euros based on accumulated ERE credits and API estimate basis.
+ * Formula: net_price = price_per_ere * (1 - effective_fee_pct / 100); earnings = ere_credits * net_price
+ */
+export function calculateEstimatedEarnings(
+  ereCredits: number,
+  estimateBasis?: JouloEstimateBasis,
+): number {
+  if (!estimateBasis || estimateBasis.price_per_ere === undefined) {
+    return 0;
+  }
+  const grossPrice = estimateBasis.price_per_ere;
+  const feePct = estimateBasis.effective_fee_pct ?? 0;
+  const netPrice = grossPrice * (1 - feePct / 100);
+  return Number((ereCredits * netPrice).toFixed(2));
+}
+

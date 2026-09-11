@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joulo API Token</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+      color: #333;
+      background-color: transparent;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 440px;
+      margin: 0 auto;
+    }
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: #111;
+    }
+    .instructions {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #555;
+      margin-bottom: 20px;
+    }
+    .instructions ol {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+    .instructions li {
+      margin-bottom: 6px;
+    }
+    .instructions a {
+      color: #0070f3;
+      text-decoration: underline;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #333;
+    }
+    .input-wrapper {
+      position: relative;
+    }
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 1rem;
+      font-family: monospace;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      border-color: #0070f3;
+      box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background-color: #0070f3;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .btn-submit:hover {
+      background-color: #005bb5;
+    }
+    .btn-submit:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+    .error-msg {
+      margin-top: 12px;
+      padding: 10px;
+      background-color: #ffeef0;
+      border: 1px solid #ffccd2;
+      border-radius: 6px;
+      color: #d73a49;
+      font-size: 0.875rem;
+      display: none;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        color: #eee;
+      }
+      h2 {
+        color: #fff;
+      }
+      .instructions {
+        color: #aaa;
+      }
+      label {
+        color: #ddd;
+      }
+      input[type="password"],
+      input[type="text"] {
+        background-color: #222;
+        color: #eee;
+        border-color: #444;
+      }
+      .error-msg {
+        background-color: #3b1b1f;
+        border-color: #661f26;
+        color: #f85149;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="heading">Verbinden met Joulo</h2>
+    <div class="instructions">
+      <p id="intro">Koppel je Joulo account om je laadsessies en ERE-opbrengst uit te lezen:</p>
+      <ol>
+        <li id="step1">Open het <a href="https://joulo.nl/dashboard" target="_blank" rel="noopener">Joulo Dashboard</a>.</li>
+        <li id="step2">Ga naar <strong>Instellingen &rarr; API</strong> en kopieer je persoonlijke API-token.</li>
+        <li id="step3">Plak het token hieronder en klik op <strong>Verbinden</strong>.</li>
+      </ol>
+    </div>
+
+    <form id="token-form">
+      <div class="form-group">
+        <label for="token-input" id="label-token">Persoonlijk Bearer Token</label>
+        <div class="input-wrapper">
+          <input
+            id="token-input"
+            type="password"
+            placeholder="joulo_..."
+            autocomplete="off"
+            required
+          />
+        </div>
+      </div>
+
+      <button type="submit" id="btn-submit" class="btn-submit">Verbinden</button>
+      <div id="error-msg" class="error-msg"></div>
+    </form>
+  </div>
+
+  <script type="application/javascript">
+    function onHomeyReady(Homey) {
+      const isDutch = (navigator.language || '').toLowerCase().startsWith('nl');
+
+      if (!isDutch) {
+        document.getElementById('heading').innerText = 'Connect with Joulo';
+        document.getElementById('intro').innerText = 'Connect your Joulo account to read your charging sessions and ERE earnings:';
+        document.getElementById('step1').innerHTML = 'Open the <a href="https://joulo.nl/dashboard" target="_blank" rel="noopener">Joulo Dashboard</a>.';
+        document.getElementById('step2').innerHTML = 'Navigate to <strong>Settings &rarr; API</strong> and copy your personal API token.';
+        document.getElementById('step3').innerHTML = 'Paste the token below and click <strong>Connect</strong>.';
+        document.getElementById('label-token').innerText = 'Personal Bearer Token';
+        document.getElementById('btn-submit').innerText = 'Connect';
+      }
+
+      const form = document.getElementById('token-form');
+      const tokenInput = document.getElementById('token-input');
+      const submitBtn = document.getElementById('btn-submit');
+      const errorDiv = document.getElementById('error-msg');
+
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const token = tokenInput.value.trim();
+        if (!token) return;
+
+        errorDiv.style.display = 'none';
+        submitBtn.disabled = true;
+        if (typeof Homey.showLoadingOverlay === 'function') {
+          Homey.showLoadingOverlay(isDutch ? 'Verifiëren...' : 'Verifying...');
+        }
+
+        try {
+          await Homey.emit('validate_token', { token: token });
+          if (typeof Homey.hideLoadingOverlay === 'function') {
+            Homey.hideLoadingOverlay();
+          }
+          if (typeof Homey.nextView === 'function') {
+            Homey.nextView();
+          }
+        } catch (err) {
+          if (typeof Homey.hideLoadingOverlay === 'function') {
+            Homey.hideLoadingOverlay();
+          }
+          submitBtn.disabled = false;
+          errorDiv.innerText = err.message || (isDutch ? 'Ongeldig token of fout bij verbinden.' : 'Invalid token or connection error.');
+          errorDiv.style.display = 'block';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+

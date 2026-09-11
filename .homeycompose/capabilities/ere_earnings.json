@@ -1,0 +1,19 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Estimated ERE Earnings",
+    "nl": "Geschatte ERE-opbrengst"
+  },
+  "desc": {
+    "en": "Estimated financial value of accumulated ERE credits in euros",
+    "nl": "Geschatte financiële waarde van opgebouwde ERE-credits in euro"
+  },
+  "units": "€",
+  "decimals": 2,
+  "chartType": "line",
+  "uiComponent": "sensor",
+  "insights": true,
+  "getable": true,
+  "setable": false
+}
+
