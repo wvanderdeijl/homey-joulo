@@ -28,7 +28,7 @@ describe('Homey App Workspace Scaffolding', () => {
     expect(manifest.sdk).toBe(3);
     expect(manifest.runtime).toBe('nodejs');
     expect(manifest.platforms).toContain('local');
-    expect(manifest.brandColor).toBe('#3A9A6F');
+    expect(manifest.brandColor).toBe('#2E9E6E');
     expect(manifest.category).toContain('energy');
   });
 
