@@ -9,7 +9,6 @@ export type JouloChargerStatus =
   | 'online'
   | 'charging'
   | 'active'
-  | 'ACTIVE'
   | 'offline'
   | 'unavailable'
   | 'unknown';
