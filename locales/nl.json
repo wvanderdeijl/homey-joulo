@@ -1,2 +1,8 @@
-{}
-
+{
+  "errors": {
+    "reboot_cooldown": "De laadpaal is recent herstart. Er geldt een afkoelperiode van 5 minuten tussen herstarts.",
+    "charger_offline": "De laadpaal is momenteel offline of onbereikbaar.",
+    "auth_error": "Authenticatiefout. Controleer het Bearer-token in de Joulo Account instellingen.",
+    "client_unavailable": "Joulo API-client is niet geconfigureerd. Koppel of configureer eerst het Joulo Account."
+  }
+}

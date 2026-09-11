@@ -3,11 +3,32 @@ import type {
   PollingCoordinator,
   ChargerDeviceReceiver,
 } from '../../lib/polling-coordinator';
-import type { JouloCharger } from '../../lib/types';
+import type { JouloCharger, JouloRebootType } from '../../lib/types';
+import {
+  JouloAuthError,
+  JouloCooldownError,
+  JouloOfflineError,
+} from '../../lib/joulo-client';
+
+/**
+ * Standard conversion heuristic: ~3 kWh per ERE credit.
+ */
+const DEFAULT_KWH_PER_ERE_CREDIT = 3.0;
+
+interface ActiveSessionState {
+  id: string | null;
+  startedAt: number | null;
+  idTag: string;
+  kwh: number;
+}
 
 class ChargerDevice extends Homey.Device implements ChargerDeviceReceiver {
   private lastMeterWh: number | null = null;
   private lastMeterTime: number | null = null;
+
+  // Flow triggers and session tracking
+  private wasCharging: boolean | null = null;
+  private activeSession: ActiveSessionState | null = null;
 
   /**
    * Return the unique Joulo charger identifier.
@@ -48,6 +69,67 @@ class ChargerDevice extends Homey.Device implements ChargerDeviceReceiver {
       charger.is_charging === true ||
       charger.status === 'charging' ||
       charger.status === 'active';
+
+    const currentSession = charger.current_session;
+
+    // Detect session started:
+    // Only fire when transitioning from known idle (false) to charging,
+    // or when already charging and a distinctly new session ID is reported.
+    // Avoid false positive on initial Homey app startup when wasCharging is null.
+    const isNewSession = Boolean(
+      this.wasCharging === true &&
+      currentSession?.id &&
+      this.activeSession?.id &&
+      currentSession.id !== this.activeSession.id,
+    );
+
+    if ((this.wasCharging === false && isCharging) || isNewSession) {
+      this.log(`Charging session started for charger ${this.getName()}`);
+      void this.triggerSessionStarted();
+    }
+
+    if (isCharging) {
+      const startedAt = currentSession?.started_at
+        ? new Date(currentSession.started_at).getTime()
+        : this.activeSession?.startedAt ?? Date.now();
+
+      this.activeSession = {
+        id: currentSession?.id ?? this.activeSession?.id ?? null,
+        startedAt,
+        idTag: currentSession?.id_tag ?? this.activeSession?.idTag ?? '',
+        kwh: typeof currentSession?.kwh_so_far === 'number'
+          ? currentSession.kwh_so_far
+          : this.activeSession?.kwh ?? 0,
+      };
+    }
+
+    // Detect session completed (transition from active charging to idle)
+    if (this.wasCharging === true && !isCharging) {
+      this.log(`Charging session completed for charger ${this.getName()}`);
+      const durationMs = this.activeSession?.startedAt
+        ? Math.max(0, Date.now() - this.activeSession.startedAt)
+        : 0;
+      const durationMinutes = Math.max(1, Math.round(durationMs / 60000));
+      const totalKwh = this.activeSession?.kwh ?? 0;
+
+      // Only MID-certified chargers earn official ERE credits per RED III / CONTEXT.md
+      const isMidCertified = charger.mid_certified !== false;
+      const ereEarned = isMidCertified
+        ? Number((totalKwh / DEFAULT_KWH_PER_ERE_CREDIT).toFixed(2))
+        : 0;
+      const idTag = this.activeSession?.idTag ?? '';
+
+      void this.triggerSessionCompleted({
+        kwh_total: totalKwh,
+        session_duration: durationMinutes,
+        ere_earned: ereEarned,
+        id_tag: idTag,
+      });
+
+      this.activeSession = null;
+    }
+
+    this.wasCharging = isCharging;
 
     // 1. evcharger_charging (boolean)
     await this.setCapabilityValue('evcharger_charging', isCharging);
@@ -104,6 +186,62 @@ class ChargerDevice extends Homey.Device implements ChargerDeviceReceiver {
     }
 
     await this.setCapabilityValue('measure_power', powerWatts);
+  }
+
+  /**
+   * Trigger the "charger_session_started" Flow card.
+   */
+  public async triggerSessionStarted(): Promise<void> {
+    try {
+      const card = this.homey.flow.getDeviceTriggerCard('charger_session_started');
+      await card.trigger(this);
+    } catch (err) {
+      this.error('Failed to trigger charger_session_started:', err);
+    }
+  }
+
+  /**
+   * Trigger the "charger_session_completed" Flow card with session tokens.
+   */
+  public async triggerSessionCompleted(tokens: {
+    kwh_total: number;
+    session_duration: number;
+    ere_earned: number;
+    id_tag: string;
+  }): Promise<void> {
+    try {
+      const card = this.homey.flow.getDeviceTriggerCard('charger_session_completed');
+      await card.trigger(this, tokens);
+    } catch (err) {
+      this.error('Failed to trigger charger_session_completed:', err);
+    }
+  }
+
+  /**
+   * Reboot the charger remotely via Joulo OCPP gateway.
+   */
+  public async reboot(type: JouloRebootType): Promise<void> {
+    const client = this.getCoordinator()?.getClient();
+    if (!client) {
+      throw new Error(this.homey.__('errors.client_unavailable') || 'Joulo API client is not configured.');
+    }
+
+    try {
+      const response = await client.rebootCharger(this.getChargerId(), type);
+      this.log(`Reboot (${type}) triggered for charger ${this.getName()}: status ${response.status}`);
+    } catch (err) {
+      if (err instanceof JouloCooldownError) {
+        throw new Error(this.homey.__('errors.reboot_cooldown') || 'Charger was rebooted recently. A 5-minute cooldown is required between reboots.');
+      }
+      if (err instanceof JouloOfflineError) {
+        throw new Error(this.homey.__('errors.charger_offline') || 'Charger is currently offline or unreachable.');
+      }
+      if (err instanceof JouloAuthError) {
+        throw new Error(this.homey.__('errors.auth_error') || 'Authentication failed. Please verify Bearer token in Joulo Account settings.');
+      }
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(message);
+    }
   }
 
   /**

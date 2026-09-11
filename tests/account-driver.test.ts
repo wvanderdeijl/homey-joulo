@@ -20,7 +20,13 @@ vi.mock('homey', () => {
       setInterval: vi.fn((fn: () => void, ms: number) => setTimeout(fn, ms)),
       clearInterval: vi.fn((id: NodeJS.Timeout) => clearTimeout(id)),
       __: vi.fn((key: string) => key),
+      flow: {
+        getDeviceTriggerCard: vi.fn(() => ({ trigger: vi.fn().mockResolvedValue(undefined) })),
+      },
     };
+    getName() {
+      return 'Account';
+    }
     log() {}
     error() {}
 

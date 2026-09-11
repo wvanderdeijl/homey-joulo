@@ -2,12 +2,25 @@ import Homey from 'homey';
 import type { PollingCoordinator } from '../../lib/polling-coordinator';
 import type { JouloClient } from '../../lib/joulo-client';
 
+import type ChargerDevice from './device';
+
 class ChargerDriver extends Homey.Driver {
   /**
    * onInit is called when the driver is initialized.
    */
   override async onInit(): Promise<void> {
     this.log('ChargerDriver has been initialized');
+
+    try {
+      (['Soft', 'Hard'] as const).forEach((type) => {
+        const actionId = `charger_reboot_${type.toLowerCase()}`;
+        this.homey.flow.getActionCard(actionId).registerRunListener(async (args: { device: ChargerDevice }) => {
+          await args.device.reboot(type);
+        });
+      });
+    } catch (err) {
+      this.error('Failed to register reboot action card listeners:', err);
+    }
   }
 
   /**

@@ -1,0 +1,52 @@
+{
+  "title": {
+    "en": "Charging session completed",
+    "nl": "Laadsessie voltooid"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=charger"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "kwh_total",
+      "type": "number",
+      "title": {
+        "en": "Total Energy (kWh)",
+        "nl": "Totale energie (kWh)"
+      },
+      "example": 14.5
+    },
+    {
+      "name": "session_duration",
+      "type": "number",
+      "title": {
+        "en": "Duration (minutes)",
+        "nl": "Duur (minuten)"
+      },
+      "example": 85
+    },
+    {
+      "name": "ere_earned",
+      "type": "number",
+      "title": {
+        "en": "ERE Credits Earned",
+        "nl": "Verdiende ERE-credits"
+      },
+      "example": 4.8
+    },
+    {
+      "name": "id_tag",
+      "type": "string",
+      "title": {
+        "en": "RFID Tag",
+        "nl": "RFID-tag"
+      },
+      "example": "jlaPBLR0067249"
+    }
+  ]
+}
+

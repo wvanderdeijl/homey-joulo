@@ -1,0 +1,18 @@
+{
+  "title": {
+    "en": "Restart charger (Soft)",
+    "nl": "Herstart laadpaal (Soft)"
+  },
+  "hint": {
+    "en": "Sends a remote soft reboot command via Joulo OCPP gateway",
+    "nl": "Verstuurt een zachte herstartopdracht via de Joulo OCPP-gateway"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=charger"
+    }
+  ]
+}
+

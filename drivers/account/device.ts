@@ -16,6 +16,7 @@ import type {
 class AccountDevice extends Homey.Device implements AccountDeviceReceiver {
   private client: JouloClient | null = null;
   private consecutiveFailures = 0;
+  private lastEreCredits: number | null = null;
 
   /**
    * Get the central PollingCoordinator from the App instance if available.
@@ -29,20 +30,20 @@ class AccountDevice extends Homey.Device implements AccountDeviceReceiver {
    */
   override async onInit(): Promise<void> {
     this.log('AccountDevice has been initialized');
-    const token = this.getSetting('token');
-    const coordinator = this.getCoordinator();
 
-    if (typeof token === 'string' && token.trim()) {
-      this.client = new JouloClient({ token: token.trim() });
+    const token = this.getSetting('token');
+    if (token && typeof token === 'string') {
+      this.client = new JouloClient({ token });
+
+      const coordinator = this.getCoordinator();
       if (coordinator) {
-        coordinator.setToken(token.trim());
+        coordinator.setToken(token);
         const pollInterval = Number(this.getSetting('poll_interval'));
         if (pollInterval) {
           coordinator.updateIntervals(undefined, pollInterval);
         }
         coordinator.registerAccountDevice(this);
       } else {
-        // Fallback for standalone/test execution without coordinator
         await this.syncAccountData();
       }
     } else {
@@ -64,7 +65,31 @@ class AccountDevice extends Homey.Device implements AccountDeviceReceiver {
     const earnings = calculateEstimatedEarnings(energy.total_ere_credits, estimateBasis);
     await this.setCapabilityValue('ere_earnings', earnings);
 
+    // Detect ERE credits change and fire trigger card
+    if (typeof energy.total_ere_credits === 'number') {
+      if (this.lastEreCredits !== null && energy.total_ere_credits !== this.lastEreCredits) {
+        const delta = Number((energy.total_ere_credits - this.lastEreCredits).toFixed(2));
+        void this.triggerEreCreditsUpdated({
+          total_credits: energy.total_ere_credits,
+          credits_delta: delta,
+        });
+      }
+      this.lastEreCredits = energy.total_ere_credits;
+    }
+
     this.consecutiveFailures = 0;
+  }
+
+  /**
+   * Trigger the "account_ere_credits_updated" Flow card with tokens.
+   */
+  public async triggerEreCreditsUpdated(tokens: { total_credits: number; credits_delta: number }): Promise<void> {
+    try {
+      const card = this.homey.flow.getDeviceTriggerCard('account_ere_credits_updated');
+      await card.trigger(this, tokens);
+    } catch (err) {
+      this.error('Failed to trigger account_ere_credits_updated:', err);
+    }
   }
 
   /**
