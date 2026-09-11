@@ -1,0 +1,41 @@
+{
+  "name": {
+    "en": "Joulo Charger",
+    "nl": "Joulo Laadpaal"
+  },
+  "class": "evcharger",
+  "capabilities": [
+    "measure_power",
+    "meter_power",
+    "evcharger_charging",
+    "meter_session_kwh"
+  ],
+  "energy": {
+    "evCharger": true,
+    "meterPowerImportedCapability": "meter_power"
+  },
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "cloud"
+  ],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ]
+}

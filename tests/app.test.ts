@@ -24,7 +24,7 @@ describe('Homey App Workspace Scaffolding', () => {
     const manifest = readJsonConfig<Manifest>('.homeycompose/app.json');
     expect(manifest.id).toBe('com.vanderdeijl.homey.joulo');
     expect(manifest.version).toBe('1.0.0');
-    expect(manifest.compatibility).toBe('>=12.4.0');
+    expect(manifest.compatibility).toBe('>=12.4.5');
     expect(manifest.sdk).toBe(3);
     expect(manifest.runtime).toBe('nodejs');
     expect(manifest.platforms).toContain('local');

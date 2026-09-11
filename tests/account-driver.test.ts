@@ -361,10 +361,17 @@ describe('AccountDevice Lifecycle and Metric Synchronization', () => {
     vi.unstubAllGlobals();
   });
 
-  it('should clear interval timers on deleted', async () => {
-    (device as any).pollTimer = setTimeout(() => {}, 10000);
+  it('should unregister from coordinator on deleted', async () => {
+    const unregisterSpy = vi.fn();
+    (device as any).homey = {
+      app: {
+        pollingCoordinator: {
+          unregisterAccountDevice: unregisterSpy,
+        },
+      },
+    };
     await device.onDeleted();
-    expect((device as any).pollTimer).toBeNull();
+    expect(unregisterSpy).toHaveBeenCalledWith(device);
   });
 });
 

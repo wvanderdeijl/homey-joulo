@@ -4,13 +4,25 @@ import {
   JouloAuthError,
   calculateEstimatedEarnings,
 } from '../../lib/joulo-client';
+import type {
+  PollingCoordinator,
+  AccountDeviceReceiver,
+} from '../../lib/polling-coordinator';
+import type {
+  JouloEnergyResponse,
+  JouloEstimateBasis,
+} from '../../lib/types';
 
-const MAX_CONSECUTIVE_TRANSIENT_FAILURES = 3;
-
-class AccountDevice extends Homey.Device {
+class AccountDevice extends Homey.Device implements AccountDeviceReceiver {
   private client: JouloClient | null = null;
-  private pollTimer: NodeJS.Timeout | null = null;
   private consecutiveFailures = 0;
+
+  /**
+   * Get the central PollingCoordinator from the App instance if available.
+   */
+  private getCoordinator(): PollingCoordinator | undefined {
+    return (this.homey?.app as { pollingCoordinator?: PollingCoordinator } | undefined)?.pollingCoordinator;
+  }
 
   /**
    * onInit is called when the device is initialized.
@@ -18,43 +30,64 @@ class AccountDevice extends Homey.Device {
   override async onInit(): Promise<void> {
     this.log('AccountDevice has been initialized');
     const token = this.getSetting('token');
-    await this.initializeClient(typeof token === 'string' ? token : undefined);
-    this.setupPolling();
-  }
+    const coordinator = this.getCoordinator();
 
-  /**
-   * Initialize or update the API client with a given token.
-   */
-  private async initializeClient(rawToken?: string): Promise<void> {
-    const token = rawToken?.trim();
-    if (token) {
-      this.client = new JouloClient({ token });
-      await this.syncAccountData();
+    if (typeof token === 'string' && token.trim()) {
+      this.client = new JouloClient({ token: token.trim() });
+      if (coordinator) {
+        coordinator.setToken(token.trim());
+        const pollInterval = Number(this.getSetting('poll_interval'));
+        if (pollInterval) {
+          coordinator.updateIntervals(undefined, pollInterval);
+        }
+        coordinator.registerAccountDevice(this);
+      } else {
+        // Fallback for standalone/test execution without coordinator
+        await this.syncAccountData();
+      }
     } else {
-      this.client = null;
       await this.setUnavailable('API Bearer token is required. Please configure in settings.');
     }
   }
 
   /**
-   * Set up recurring synchronization timer.
+   * Handle account data distributed centrally by the PollingCoordinator (ADR 0002).
    */
-  private setupPolling(): void {
-    if (this.pollTimer) {
-      this.homey.clearInterval(this.pollTimer);
-      this.pollTimer = null;
-    }
+  async onAccountData(energy: JouloEnergyResponse, estimateBasis?: JouloEstimateBasis): Promise<void> {
+    // Cumulative energy reading in kWh
+    await this.setCapabilityValue('meter_power', energy.total_kwh);
 
-    const intervalSec = Number(this.getSetting('poll_interval')) || 300;
-    const intervalMs = Math.max(intervalSec, 60) * 1000;
+    // Cumulative ERE credits
+    await this.setCapabilityValue('ere_credits', energy.total_ere_credits);
 
-    this.pollTimer = this.homey.setInterval(() => {
-      void this.syncAccountData();
-    }, intervalMs);
+    // Calculate estimated net earnings in EUR from Joulo sessions estimate basis
+    const earnings = calculateEstimatedEarnings(energy.total_ere_credits, estimateBasis);
+    await this.setCapabilityValue('ere_earnings', earnings);
+
+    this.consecutiveFailures = 0;
   }
 
   /**
-   * Synchronize account energy metrics, ERE credits, and estimated earnings from Joulo.
+   * Called by coordinator on prolonged failure or authentication error.
+   */
+  async onCoordinatorError(message: string, isAuthError: boolean): Promise<void> {
+    if (isAuthError) {
+      await this.setUnavailable('Invalid or expired Bearer token. Please update in settings.');
+    } else {
+      await this.setUnavailable(message);
+    }
+  }
+
+  /**
+   * Called by coordinator when communication is restored.
+   */
+  async onCoordinatorAvailable(): Promise<void> {
+    await this.setAvailable();
+  }
+
+  /**
+   * Synchronize account energy metrics, ERE credits, and estimated earnings directly.
+   * Used for direct manual calls or fallback environments.
    */
   async syncAccountData(): Promise<void> {
     if (!this.client) {
@@ -64,25 +97,16 @@ class AccountDevice extends Homey.Device {
 
     try {
       const energy = await this.client.getEnergy();
+      let estimateBasis: JouloEstimateBasis | undefined;
 
-      // Cumulative energy reading in kWh
-      await this.setCapabilityValue('meter_power', energy.total_kwh);
-
-      // Cumulative ERE credits
-      await this.setCapabilityValue('ere_credits', energy.total_ere_credits);
-
-      // Calculate estimated net earnings in EUR from Joulo sessions estimate basis
       try {
         const sessionsResp = await this.client.getSessionsResponse({ limit: 1 });
-        const earnings = calculateEstimatedEarnings(
-          energy.total_ere_credits,
-          sessionsResp.estimate_basis,
-        );
-        await this.setCapabilityValue('ere_earnings', earnings);
+        estimateBasis = sessionsResp.estimate_basis;
       } catch (err) {
         this.error('Could not fetch sessions estimate basis for earnings calculation:', err);
       }
 
+      await this.onAccountData(energy, estimateBasis);
       this.consecutiveFailures = 0;
       await this.setAvailable();
     } catch (err) {
@@ -94,8 +118,7 @@ class AccountDevice extends Homey.Device {
         const msg = err instanceof Error ? err.message : String(err);
         this.error(`Failed to synchronize Joulo account data (attempt ${this.consecutiveFailures}):`, err);
 
-        // Per CONTEXT.md: Keep persistent capability values; mark unavailable only on prolonged failure
-        if (this.consecutiveFailures >= MAX_CONSECUTIVE_TRANSIENT_FAILURES) {
+        if (this.consecutiveFailures >= 3) {
           await this.setUnavailable(msg);
         }
       }
@@ -114,14 +137,32 @@ class AccountDevice extends Homey.Device {
     changedKeys: string[];
   }): Promise<string | void> {
     this.log('AccountDevice settings were changed:', changedKeys);
+    const coordinator = this.getCoordinator();
 
     if (changedKeys.includes('token')) {
-      const token = typeof newSettings['token'] === 'string' ? newSettings['token'] : undefined;
-      await this.initializeClient(token);
+      const rawToken = newSettings['token'];
+      const token = typeof rawToken === 'string' ? rawToken.trim() : '';
+      if (token) {
+        this.client = new JouloClient({ token });
+        if (coordinator) {
+          coordinator.setToken(token);
+        } else {
+          void this.syncAccountData();
+        }
+      } else {
+        this.client = null;
+        if (coordinator) {
+          coordinator.setToken(null);
+        }
+        await this.setUnavailable('API Bearer token is required. Please configure in settings.');
+      }
     }
 
     if (changedKeys.includes('poll_interval')) {
-      this.setupPolling();
+      const pollInterval = Number(newSettings['poll_interval']);
+      if (coordinator && pollInterval) {
+        coordinator.updateIntervals(undefined, pollInterval);
+      }
     }
   }
 
@@ -129,9 +170,9 @@ class AccountDevice extends Homey.Device {
    * onDeleted is called when the user deletes the device.
    */
   override async onDeleted(): Promise<void> {
-    if (this.pollTimer) {
-      this.homey.clearInterval(this.pollTimer);
-      this.pollTimer = null;
+    const coordinator = this.getCoordinator();
+    if (coordinator) {
+      coordinator.unregisterAccountDevice(this);
     }
     this.log('AccountDevice has been deleted');
   }

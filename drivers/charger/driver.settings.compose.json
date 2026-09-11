@@ -1,0 +1,43 @@
+[
+  {
+    "id": "poll_interval_active",
+    "type": "number",
+    "label": {
+      "en": "Active Charging Polling Interval",
+      "nl": "Actief laden synchronisatie-interval"
+    },
+    "hint": {
+      "en": "Interval in seconds when vehicle is actively charging (default 60s)",
+      "nl": "Interval in seconden wanneer er actief geladen wordt (standaard 60s)"
+    },
+    "value": 60,
+    "min": 15,
+    "max": 300,
+    "step": 5,
+    "units": {
+      "en": "s",
+      "nl": "s"
+    }
+  },
+  {
+    "id": "poll_interval_idle",
+    "type": "number",
+    "label": {
+      "en": "Standby Polling Interval",
+      "nl": "Standby synchronisatie-interval"
+    },
+    "hint": {
+      "en": "Interval in seconds when charger is idle or standby (default 300s)",
+      "nl": "Interval in seconden wanneer de lader in rust of standby is (standaard 300s)"
+    },
+    "value": 300,
+    "min": 60,
+    "max": 3600,
+    "step": 30,
+    "units": {
+      "en": "s",
+      "nl": "s"
+    }
+  }
+]
+
