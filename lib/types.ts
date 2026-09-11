@@ -8,6 +8,8 @@ export type JouloConnectionType = 'cloud_api' | 'ocpp';
 export type JouloChargerStatus =
   | 'online'
   | 'charging'
+  | 'active'
+  | 'ACTIVE'
   | 'offline'
   | 'unavailable'
   | 'unknown';
