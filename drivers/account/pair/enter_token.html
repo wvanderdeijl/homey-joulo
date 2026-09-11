@@ -145,7 +145,7 @@
           <input
             id="token-input"
             type="password"
-            placeholder="joulo_..."
+            placeholder="Plak hier je token..."
             autocomplete="off"
             required
           />
@@ -168,6 +168,7 @@
         document.getElementById('step2').innerHTML = 'Navigate to <strong>Settings &rarr; API</strong> and copy your personal API token.';
         document.getElementById('step3').innerHTML = 'Paste the token below and click <strong>Connect</strong>.';
         document.getElementById('label-token').innerText = 'Personal Bearer Token';
+        document.getElementById('token-input').placeholder = 'Paste your token here...';
         document.getElementById('btn-submit').innerText = 'Connect';
       }
 
