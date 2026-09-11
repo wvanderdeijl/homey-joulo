@@ -1,6 +1,6 @@
 {
   "name": "com.vanderdeijl.homey.joulo",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Monetize and monitor your EV charging sessions with Joulo (ERE) in Homey",
   "scripts": {
     "build": "tsc",
