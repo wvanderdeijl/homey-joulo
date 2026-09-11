@@ -53,7 +53,7 @@ Optional charger reboot test:
     const chargers = await client.getChargers();
     console.log(`✅ Found ${chargers.length} charger(s):`);
     for (const charger of chargers) {
-      console.log(`   - [${charger.status.toUpperCase()}] ${charger.nickname || charger.name || 'Unnamed'} (ID: ${charger.id})`);
+      console.log(`   - [${charger.status}] ${charger.nickname || charger.name || 'Unnamed'} (ID: ${charger.id})`);
       console.log(`     Connection: ${charger.connection_type || 'unknown'} | MID Certified: ${charger.mid_certified ? 'Yes' : 'No'} | Charging: ${charger.is_charging ? 'Yes' : 'No'}`);
       if (charger.latest_meter_wh !== undefined) {
         console.log(`     Meter reading: ${(charger.latest_meter_wh / 1000).toFixed(2)} kWh (updated: ${charger.meter_updated_at || 'unknown'})`);
