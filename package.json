@@ -1,0 +1,23 @@
+{
+  "name": "com.vanderdeijl.homey.joulo",
+  "version": "0.1.0",
+  "description": "Monetize and monitor your EV charging sessions with Joulo (ERE) in Homey",
+  "main": "app.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "validate": "homey app validate -l publish"
+  },
+  "author": "Wilfred van der Deijl",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
+  }
+}

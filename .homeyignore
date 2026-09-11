@@ -1,0 +1,12 @@
+.git/
+.gitignore
+.homeycompose/
+tsconfig.json
+vitest.config.mts
+tests/
+*.ts
+*.map
+node_modules/@types/
+node_modules/typescript/
+node_modules/vitest/
+

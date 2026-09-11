@@ -1,0 +1,27 @@
+{
+  "id": "com.vanderdeijl.homey.joulo",
+  "version": "0.1.0",
+  "compatibility": ">=12.0.0",
+  "sdk": 3,
+  "name": {
+    "en": "Joulo",
+    "nl": "Joulo"
+  },
+  "description": {
+    "en": "Monetize and monitor your EV charging sessions with Joulo",
+    "nl": "Registreer en monitor je EV laadsessies met Joulo"
+  },
+  "category": [
+    "energy"
+  ],
+  "brandColor": "#10B981",
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Wilfred van der Deijl"
+  }
+}
