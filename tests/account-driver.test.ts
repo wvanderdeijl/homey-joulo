@@ -101,7 +101,7 @@ describe('Account Driver & Custom Capabilities Configuration', () => {
     expect(manifest.capabilities).toContain('ere_earnings');
 
     expect(manifest.pair).toEqual([
-      { id: 'enter_token', navigation: { next: 'list_devices' } },
+      { id: 'enter_token' },
       { id: 'list_devices', template: 'list_devices', navigation: { next: 'add_devices' } },
       { id: 'add_devices', template: 'add_devices' },
     ]);
@@ -194,17 +194,12 @@ describe('AccountDriver Pairing Logic', () => {
     const valid = await handlers['validate_token']!({ token: 'test-token-123' });
     expect(valid).toBe(true);
 
-    // List devices should return account device and discovered chargers
+    // List devices should return only the account device (ADR 0001)
     const devices = await handlers['list_devices']!();
-    expect(devices).toHaveLength(2);
+    expect(devices).toHaveLength(1);
     expect(devices[0]).toEqual({
       name: 'Joulo Account',
       data: { id: 'joulo-account' },
-      settings: { token: 'test-token-123' },
-    });
-    expect(devices[1]).toEqual({
-      name: 'Front Charger',
-      data: { id: 'ch-1' },
       settings: { token: 'test-token-123' },
     });
 

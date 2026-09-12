@@ -1,34 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Joulo API Token</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       margin: 0;
       padding: 16px;
-      color: #333;
+      color: #1f2937;
       background-color: transparent;
-      box-sizing: border-box;
     }
     .container {
       max-width: 440px;
+      width: 100%;
       margin: 0 auto;
     }
     h2 {
       font-size: 1.25rem;
-      font-weight: 600;
+      font-weight: 700;
       margin-top: 0;
       margin-bottom: 12px;
-      color: #111;
+      color: #111827;
     }
     .instructions {
       font-size: 0.95rem;
       line-height: 1.5;
-      color: #555;
-      margin-bottom: 20px;
+      color: #4b5563;
+      margin-bottom: 24px;
     }
     .instructions ol {
       margin: 8px 0;
@@ -38,91 +45,85 @@
       margin-bottom: 6px;
     }
     .instructions a {
-      color: #0070f3;
+      color: #2E9E6E;
+      font-weight: 600;
       text-decoration: underline;
     }
     .form-group {
       margin-bottom: 20px;
+      width: 100%;
     }
     label {
       display: block;
       font-size: 0.875rem;
       font-weight: 600;
-      margin-bottom: 6px;
-      color: #333;
+      margin-bottom: 8px;
+      color: #1f2937;
     }
     .input-wrapper {
       position: relative;
-    }
-    input[type="password"],
-    input[type="text"] {
       width: 100%;
-      padding: 10px 12px;
-      font-size: 1rem;
-      font-family: monospace;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-      outline: none;
-      transition: border-color 0.2s;
     }
-    input:focus {
-      border-color: #0070f3;
-      box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
+    input[type="text"] {
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      display: block !important;
+      width: 100% !important;
+      padding: 14px 16px !important;
+      font-size: 16px !important; /* 16px strictly prevents iOS Safari zoom on focus */
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+      background-color: #f9fafb !important;
+      color: #111827 !important;
+      border: 1.5px solid #d1d5db !important;
+      border-radius: 8px !important;
+      outline: none !important;
+      box-shadow: none !important;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: #2E9E6E !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(46, 158, 110, 0.2) !important;
     }
     .btn-submit {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #fff;
-      background-color: #0070f3;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.2s;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      display: block !important;
+      width: 100% !important;
+      padding: 14px 16px !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      color: #ffffff !important;
+      background-color: #2E9E6E !important;
+      border: none !important;
+      border-radius: 8px !important;
+      cursor: pointer !important;
+      text-align: center !important;
+      opacity: 1 !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+      transition: background-color 0.15s, opacity 0.15s;
     }
-    .btn-submit:hover {
-      background-color: #005bb5;
+    .btn-submit:active {
+      background-color: #247d57 !important;
+      opacity: 0.9 !important;
     }
     .btn-submit:disabled {
-      background-color: #999;
-      cursor: not-allowed;
+      background-color: #9ca3af !important;
+      cursor: not-allowed !important;
+      opacity: 0.7 !important;
     }
     .error-msg {
-      margin-top: 12px;
-      padding: 10px;
-      background-color: #ffeef0;
-      border: 1px solid #ffccd2;
-      border-radius: 6px;
-      color: #d73a49;
+      margin-top: 14px;
+      padding: 12px;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      color: #b91c1c;
       font-size: 0.875rem;
+      line-height: 1.4;
       display: none;
-    }
-    @media (prefers-color-scheme: dark) {
-      body {
-        color: #eee;
-      }
-      h2 {
-        color: #fff;
-      }
-      .instructions {
-        color: #aaa;
-      }
-      label {
-        color: #ddd;
-      }
-      input[type="password"],
-      input[type="text"] {
-        background-color: #222;
-        color: #eee;
-        border-color: #444;
-      }
-      .error-msg {
-        background-color: #3b1b1f;
-        border-color: #661f26;
-        color: #f85149;
-      }
     }
   </style>
 </head>
@@ -132,81 +133,161 @@
     <div class="instructions">
       <p id="intro">Koppel je Joulo account om je laadsessies en ERE-opbrengst uit te lezen:</p>
       <ol>
-        <li id="step1">Open het <a href="https://joulo.nl/dashboard" target="_blank" rel="noopener">Joulo Dashboard</a>.</li>
-        <li id="step2">Ga naar <strong>Instellingen &rarr; API</strong> en kopieer je persoonlijke API-token.</li>
+        <li id="step1">Open het <a href="https://joulo.nl/dashboard?tab=api" target="_blank" rel="noopener">Joulo Dashboard (API-tab)</a>.</li>
+        <li id="step2">Kopieer je persoonlijke API-token.</li>
         <li id="step3">Plak het token hieronder en klik op <strong>Verbinden</strong>.</li>
       </ol>
     </div>
 
-    <form id="token-form">
+    <div id="token-form-container">
       <div class="form-group">
         <label for="token-input" id="label-token">Persoonlijk Bearer Token</label>
         <div class="input-wrapper">
           <input
             id="token-input"
-            type="password"
+            type="text"
             placeholder="Plak hier je token..."
             autocomplete="off"
-            required
+            autocapitalize="none"
+            autocorrect="off"
+            spellcheck="false"
           />
         </div>
       </div>
 
-      <button type="submit" id="btn-submit" class="btn-submit">Verbinden</button>
+      <button type="button" id="btn-submit" class="btn-submit">Verbinden</button>
       <div id="error-msg" class="error-msg"></div>
-    </form>
+    </div>
   </div>
 
   <script type="application/javascript">
-    function onHomeyReady(Homey) {
-      const isDutch = (navigator.language || '').toLowerCase().startsWith('nl');
+    var homeyApi = null;
+
+    function initHomey(Homey) {
+      if (homeyApi) return;
+      homeyApi = Homey;
+      if (typeof Homey.ready === 'function') {
+        Homey.ready();
+      }
+    }
+
+    // Assign globally for Homey webview caller
+    window.onHomeyReady = initHomey;
+    if (window.Homey) {
+      initHomey(window.Homey);
+    }
+
+    // Handle view setup immediately
+    function setupView() {
+      var isDutch = (navigator.language || '').toLowerCase().startsWith('nl');
 
       if (!isDutch) {
-        document.getElementById('heading').innerText = 'Connect with Joulo';
-        document.getElementById('intro').innerText = 'Connect your Joulo account to read your charging sessions and ERE earnings:';
-        document.getElementById('step1').innerHTML = 'Open the <a href="https://joulo.nl/dashboard" target="_blank" rel="noopener">Joulo Dashboard</a>.';
-        document.getElementById('step2').innerHTML = 'Navigate to <strong>Settings &rarr; API</strong> and copy your personal API token.';
-        document.getElementById('step3').innerHTML = 'Paste the token below and click <strong>Connect</strong>.';
-        document.getElementById('label-token').innerText = 'Personal Bearer Token';
-        document.getElementById('token-input').placeholder = 'Paste your token here...';
-        document.getElementById('btn-submit').innerText = 'Connect';
+        var heading = document.getElementById('heading');
+        if (heading) heading.innerText = 'Connect with Joulo';
+        var intro = document.getElementById('intro');
+        if (intro) intro.innerText = 'Connect your Joulo account to read your charging sessions and ERE earnings:';
+        var s1 = document.getElementById('step1');
+        if (s1) s1.innerHTML = 'Open the <a href="https://joulo.nl/dashboard?tab=api" target="_blank" rel="noopener">Joulo Dashboard (API tab)</a>.';
+        var s2 = document.getElementById('step2');
+        if (s2) s2.innerHTML = 'Copy your personal API token.';
+        var s3 = document.getElementById('step3');
+        if (s3) s3.innerHTML = 'Paste the token below and click <strong>Connect</strong>.';
+        var lbl = document.getElementById('label-token');
+        if (lbl) lbl.innerText = 'Personal Bearer Token';
+        var inp = document.getElementById('token-input');
+        if (inp) inp.placeholder = 'Paste your token here...';
+        var btn = document.getElementById('btn-submit');
+        if (btn) btn.innerText = 'Connect';
       }
 
-      const form = document.getElementById('token-form');
-      const tokenInput = document.getElementById('token-input');
-      const submitBtn = document.getElementById('btn-submit');
-      const errorDiv = document.getElementById('error-msg');
+      // External links open in default system browser
+      document.addEventListener('click', function(e) {
+        var link = e.target && e.target.closest ? e.target.closest('a') : null;
+        if (link && link.href && link.href.startsWith('http')) {
+          e.preventDefault();
+          if (homeyApi && typeof homeyApi.openURL === 'function') {
+            homeyApi.openURL(link.href);
+          } else {
+            window.open(link.href, '_system');
+          }
+        }
+      });
 
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const token = tokenInput.value.trim();
-        if (!token) return;
+      var tokenInput = document.getElementById('token-input');
+      var submitBtn = document.getElementById('btn-submit');
+      var errorDiv = document.getElementById('error-msg');
+
+      if (!tokenInput || !submitBtn || !errorDiv) return;
+
+      async function handleConnect() {
+        var token = tokenInput.value ? tokenInput.value.trim() : '';
+        if (!token) {
+          errorDiv.innerText = isDutch ? 'Vul eerst je persoonlijke API-token in.' : 'Please enter your personal API token first.';
+          errorDiv.style.display = 'block';
+          tokenInput.focus();
+          return;
+        }
 
         errorDiv.style.display = 'none';
+
+        // 1. Immediate visual feedback
         submitBtn.disabled = true;
-        if (typeof Homey.showLoadingOverlay === 'function') {
-          Homey.showLoadingOverlay(isDutch ? 'Verifiëren...' : 'Verifying...');
+        submitBtn.innerText = isDutch ? 'Verifiëren...' : 'Verifying...';
+        submitBtn.style.opacity = '0.7';
+
+        if (homeyApi && typeof homeyApi.showLoadingOverlay === 'function') {
+          homeyApi.showLoadingOverlay(isDutch ? 'Verbinden met Joulo...' : 'Connecting to Joulo...');
         }
 
         try {
-          await Homey.emit('validate_token', { token: token });
-          if (typeof Homey.hideLoadingOverlay === 'function') {
-            Homey.hideLoadingOverlay();
+          var h = homeyApi || window.Homey;
+          if (!h) {
+            throw new Error(isDutch ? 'Koppeling met Homey nog niet gereed. Probeer het opnieuw.' : 'Homey connection not ready. Please try again.');
           }
-          if (typeof Homey.nextView === 'function') {
-            Homey.nextView();
+
+          // Emit to driver backend
+          var res = h.emit('validate_token', { token: token });
+          if (res && typeof res.then === 'function') {
+            await res;
+          }
+
+          if (typeof h.hideLoadingOverlay === 'function') {
+            h.hideLoadingOverlay();
+          }
+
+          // Advance to list_devices
+          if (typeof h.showView === 'function') {
+            h.showView('list_devices');
+          } else if (typeof h.nextView === 'function') {
+            h.nextView();
           }
         } catch (err) {
-          if (typeof Homey.hideLoadingOverlay === 'function') {
-            Homey.hideLoadingOverlay();
+          var currentH = homeyApi || window.Homey;
+          if (currentH && typeof currentH.hideLoadingOverlay === 'function') {
+            currentH.hideLoadingOverlay();
           }
           submitBtn.disabled = false;
-          errorDiv.innerText = err.message || (isDutch ? 'Ongeldig token of fout bij verbinden.' : 'Invalid token or connection error.');
+          submitBtn.innerText = isDutch ? 'Verbinden' : 'Connect';
+          submitBtn.style.opacity = '1';
+          errorDiv.innerText = (err && err.message) ? err.message : (isDutch ? 'Ongeldig token of fout bij verbinden.' : 'Invalid token or connection error.');
           errorDiv.style.display = 'block';
         }
+      }
+
+      submitBtn.addEventListener('click', handleConnect);
+      tokenInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleConnect();
+        }
       });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupView);
+    } else {
+      setupView();
     }
   </script>
 </body>
 </html>
-

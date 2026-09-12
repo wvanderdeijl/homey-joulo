@@ -43,6 +43,7 @@ class AccountDevice extends Homey.Device implements AccountDeviceReceiver {
           coordinator.updateIntervals(undefined, pollInterval);
         }
         coordinator.registerAccountDevice(this);
+        void coordinator.poll?.();
       } else {
         await this.syncAccountData();
       }

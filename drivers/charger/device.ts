@@ -58,6 +58,7 @@ class ChargerDevice extends Homey.Device implements ChargerDeviceReceiver {
         coordinator.updateIntervals(activeSec, idleSec);
       }
       coordinator.registerChargerDevice(this);
+      void coordinator.poll?.();
     }
   }
 

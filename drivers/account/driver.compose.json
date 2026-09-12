@@ -22,10 +22,7 @@
   },
   "pair": [
     {
-      "id": "enter_token",
-      "navigation": {
-        "next": "list_devices"
-      }
+      "id": "enter_token"
     },
     {
       "id": "list_devices",
